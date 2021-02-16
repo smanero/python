@@ -18,7 +18,7 @@ In this directory some samples of the most common uses of Python (file managamen
 
 This is a Future<directory> where as soon as possible i want to learn django and develop a mp3 player/organiser.
 
-## Webscrapping
+## Webscraping
 
 Learning python, references to data obtained from internet are often found. So i have done some research and practice exercises in order to learn a shor how-to. In the web-s-py directory, different .py archives are found with scrapping, more o less functional, of some webs.
 
