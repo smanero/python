@@ -1,42 +1,13 @@
 #!/usr/bin/python3
 import os
 import time
-import requests
-import shutil
-from bs4 import BeautifulSoup
 import json
+from bs4 import BeautifulSoup
 import zipper
 
 ##########################################################################
 # base website URL
 URL : str = 'https://readcomiconline.to'
-
-##########################################################################
-# FUNCTION Descargar una imagen dada una url
-def get_image(img_url:str, fileName:str):
-   # Open the url image, set stream to True, this will return the stream content.
-   resp = requests.get(img_url, stream=True)
-   # Open a local file with wb ( write binary ) permission.
-   local_file = open(fileName, 'wb')
-   # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
-   resp.raw.decode_content = True
-   # Copy the response stream raw data to local image file.
-   shutil.copyfileobj(resp.raw, local_file)
-   # Remove the image url response object.
-   del resp
-   # import wget
-   # Invoke wget download method to download specified url image
-   #local_image_filename = wget.download(img_url)
-   #return local_image_filename
-
-##########################################################################
-#
-def get_html(url:str) -> BeautifulSoup:
-   print("Scrapping " + url)
-   page = requests.get(url)
-   soup = BeautifulSoup(page.content, 'html.parser')
-   #print("page.content " + soup.prettify())
-   return soup
 
 ##########################################################################
 # FUNCTION get cover url in a comic
@@ -125,7 +96,7 @@ def obtainIssueImagesByText(co_html: BeautifulSoup):
 ##########################################################################
 # FUNCTION list all images in a issue
 def obtainIssueImages(co_url : str):
-   co_html : BeautifulSoup = get_html(co_url)
+   co_html : BeautifulSoup = zipper.get_html(co_url)
    # text treating
    images_to_do = obtainIssueImagesByText(co_html)
    #if 0 >= len(images_to_do):
@@ -148,7 +119,7 @@ def scrapeIssue(co_title:str, co_url:str, dir:str):
       img_title = image["img_title"]
       img_url = image["img_url"]
       print(img_title + ": " + img_url)
-      get_image(img_url, co_dir + "/" + img_title)
+      zipper.get_image(img_url, co_dir + "/" + img_title)
       time.sleep(3)
 
 ##########################################################################
@@ -157,7 +128,7 @@ def scrapeComic(html:BeautifulSoup, dir:str):
    # obtain cover of the comic
    img_url = obtainComicCover(html)
    cover_file = dir + "/cover.jpg"
-   get_image(img_url, cover_file)
+   zipper.get_image(img_url, cover_file)
    print("title: " + dir + "cover: " + img_url)
    # obtain array of issues to scrape
    issues_to_do = obtainComicIssues(html)
@@ -184,7 +155,7 @@ def main():
       if not os.path.exists(dir):
          os.makedirs(dir)
       # scrape all comic items
-      html = get_html(URL + "/Comic/" + title)
+      html = zipper.get_html(URL + "/Comic/" + title)
       scrapeComic(html, dir)
       # zip result directory with cbz extension
       zipper.zip(dir, dir + '.cbz')

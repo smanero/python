@@ -1,10 +1,7 @@
 #!/usr/bin/python3
 import os
 import time
-import requests
-import shutil
 from bs4 import BeautifulSoup
-import json
 import zipper
 import threading
 import time
@@ -35,30 +32,6 @@ def run_threads():
       t.join()
    print("Exiting Main Thread")
 
-# FUNCTION Descargar una imagen dada una url
-def get_image(img_url:str, fileName:str):
-   # Open the url image, set stream to True, this will return the stream content.
-   resp = requests.get(img_url, stream=True)
-   # Open a local file with wb ( write binary ) permission.
-   local_file = open(fileName, 'wb')
-   # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
-   resp.raw.decode_content = True
-   # Copy the response stream raw data to local image file.
-   shutil.copyfileobj(resp.raw, local_file)
-   # Remove the image url response object.
-   del resp
-   # import wget
-   # Invoke wget download method to download specified url image
-   #local_image_filename = wget.download(img_url)
-   #return local_image_filename
-
-def get_html(url:str) -> BeautifulSoup:
-   print("Scrapping " + url)
-   page = requests.get(url)
-   soup = BeautifulSoup(page.content, 'html.parser')
-   #print("page.content " + soup.prettify())
-   return soup
-
 # FUNCTION Scrape el resultado de busqueda en dos farma
 def scrapeMain(html:BeautifulSoup, dir:str, issue_idx:int):
    #headings = html.findAll('div', attrs={'class':'heading'})
@@ -71,7 +44,7 @@ def scrapeMain(html:BeautifulSoup, dir:str, issue_idx:int):
 
 
    cover_file = dir + "/cover.jpg"
-   get_image(img_url, cover_file)
+   zipper.get_image(img_url, cover_file)
 
    issues = html.find('ul', attrs={'class':'list'}).findAll('li')
    for issue in issues:
@@ -94,7 +67,7 @@ def scrapeIssue(co_title:str, co_url:str, co_dir:str):
    print(" " + co_title + ": " + co_url)
    if not os.path.exists(co_dir):
          os.makedirs(co_dir)
-   co_html = get_html(co_url).prettify()
+   co_html = zipper.get_html(co_url).prettify()
    img_idx = 0
    html_idx: int = co_html.find('lstImages.push')
    while -1 != html_idx:
@@ -103,7 +76,7 @@ def scrapeIssue(co_title:str, co_url:str, co_dir:str):
       img_url = img_url.replace('lstImages.push("', '').replace('")', '')
       img_title = "img-" + str(img_idx).zfill(3) + ".jpg"
       print(img_title + ": " + img_url)
-      get_image(img_url, co_dir + "/" + img_title)
+      zipper.get_image(img_url, co_dir + "/" + img_title)
       # next img
       img_idx = img_idx+1
       co_html = co_html[co_html.find(';'):]
@@ -115,7 +88,7 @@ def main():
    try:
       URL = 'https://readcomiconline.to/Comic/'
       title = 'The-Savage-Sword-Of-Conan'
-      html = get_html(URL + title)
+      html = zipper.get_html(URL + title)
       # dir destiny
       dir = title.replace(':', '_').replace(',', '_').replace(' ', '_').replace('(', '').replace(')', '')
       if not os.path.exists(dir):
